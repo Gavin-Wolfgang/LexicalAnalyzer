@@ -33,7 +33,7 @@ int readFile(char *filename, char *contents) {
 		contents[i++] = c;
 	}
 
-	close(file);
+	fclose(file);
 	return i;
 }
 
@@ -47,6 +47,167 @@ bool isDigit(char c) {
 
 void error(int e) {
 	printf("Error %d", e);
+	exit(e);
+}
+
+Token *analyzeOther(int *counter, char *contents, Token *toke) {
+	switch (contents[*counter]) {
+		toke->lexeme = (char *)malloc(2*sizeof(char));
+		case '+':
+			toke->type = plussym;
+			strcpy(toke->lexeme, "+\0");
+			return toke;
+		case '-':
+			toke->type = minussym;
+			strcpy(toke->lexeme, "-\0");
+			return toke;
+		case '*':
+			toke->type = multsym;
+			strcpy(toke->lexeme, "*\0");
+			return toke;
+		case '/':
+			toke->type = slashsym;
+			free(toke->lexeme);
+			return toke;
+		case '=':
+			toke->type = eqsym;
+			strcpy(toke->lexeme, "=\0");
+			return toke;
+		case '<':
+			toke->type = lessym;
+			free(toke->lexeme);
+			return toke;
+		case '>':
+			toke->type = gtrsym;
+			free(toke->lexeme);
+			return toke;
+		case '(':
+			toke->type = lparentsym;
+			strcpy(toke->lexeme, "(\0");
+			return toke;
+		case ')':
+			toke->type = rparentsym;
+			strcpy(toke->lexeme, ")\0");
+			return toke;
+		case ',':
+			toke->type = commasym;
+			strcpy(toke->lexeme, ",\0");
+			return toke;
+		case ';':
+			toke->type = semicolonsym;
+			strcpy(toke->lexeme, ";\0");
+			return toke;
+		case '.':
+			toke->type = periodsym;
+			strcpy(toke->lexeme, ".\0");
+			return toke;
+		case ':':
+			toke->type = becomessym;
+			strcpy(toke->lexeme, ".\0");
+			return toke;
+		default:
+			error(4);
+	}
+}
+
+Token *analyzeNumber(int *counter, char *contents, Token *toke) {
+	int i;
+	
+	for(i=1; i<5; i++) {
+		if (!isDigit(contents[*counter+i])) {
+			// if its a letter it should throw an error, most likely error(1)
+			if(isLetter(contents[*counter+i]))
+				error(1);
+			break;
+		}
+	}
+	if (isDigit(contents[*counter+i])) error(2);
+
+	toke->lexeme = (char *)malloc((i+1)*sizeof(char));
+	strncpy(toke->lexeme, contents+*counter, i);
+	toke->lexeme[i] = '\0';
+	*counter += i-1;
+	return toke;
+}
+
+Token *analyzeIdentifier(int *counter, char *contents, Token *toke) {
+	char word[MAX_IDENT+1];
+	int i;
+
+	word[0] = contents[*counter];
+	for(i=1; i<11; i++) {
+		word[i] = contents[*counter+i];
+		word[i+1] = '\0';
+		if (!isLetter(word[i]) && !isDigit(word[i])) { 
+			break;
+		} else if (i == 1 && strcmp(word, "if") == 0) {
+			toke->lexeme = (char *)malloc(3*sizeof(char));
+			strcpy(toke->lexeme, "if");
+			toke->type = ifsym; 
+			return toke;
+		} else if (i == 1 && strcmp(word, "do") == 0) {
+			toke->lexeme = (char *)malloc(3*sizeof(char));
+			strcpy(toke->lexeme, "do");
+			toke->type = dosym;
+			return toke;
+		} else if (i == 2 && strcmp(word, "var") == 0) {
+			toke->lexeme = (char *)malloc(4*sizeof(char));
+			strcpy(toke->lexeme, "var");
+			toke->type = varsym;
+			return toke;
+		} else if (i == 2 && strcmp(word, "end") == 0) {
+			toke->lexeme = (char *)malloc(4*sizeof(char));
+			strcpy(toke->lexeme, "end");
+			toke->type = endsym;
+			return toke;
+		} else if (i == 3 && strcmp(word, "call") == 0) {
+			toke->lexeme = (char *)malloc(5*sizeof(char));
+			strcpy(toke->lexeme, "call");
+			toke->type = callsym;
+			return toke;
+		} else if (i == 3 && strcmp(word, "then") == 0) {
+			toke->lexeme = (char *)malloc(5*sizeof(char));
+			strcpy(toke->lexeme, "then");
+			toke->type = thensym;
+			return toke;
+		} else if (i == 3 && strcmp(word, "else") == 0) {
+			toke->lexeme = (char *)malloc(5*sizeof(char));
+			strcpy(toke->lexeme, "else");
+			toke->type = elsesym;
+			return toke;
+		} else if (i == 3 && strcmp(word, "read") == 0) {
+			toke->lexeme = (char *)malloc(5*sizeof(char));
+			strcpy(toke->lexeme, "read");
+			toke->type = readsym;
+			return toke;
+		} else if (i == 4 && strcmp(word, "const") == 0) {
+			toke->lexeme = (char *)malloc(6*sizeof(char));
+			strcpy(toke->lexeme, "const");
+			toke->type = constsym;
+			return toke;
+		} else if (i == 4 && strcmp(word, "begin") == 0) {
+			toke->lexeme = (char *)malloc(6*sizeof(char));
+			strcpy(toke->lexeme, "begin");
+			toke->type = beginsym;
+			return toke;
+		} else if (i == 4 && strcmp(word, "while") == 0) {
+			toke->lexeme = (char *)malloc(6*sizeof(char));
+			strcpy(toke->lexeme, "while");
+			toke->type = whilesym;
+			return toke;
+		} else if (i == 4 && strcmp(word, "write") == 0) {
+			toke->lexeme = (char *)malloc(6*sizeof(char));
+			strcpy(toke->lexeme, "write");
+			toke->type = writesym;
+			return toke;
+		} else if (i == 8 && strcmp(word, "procedure") == 0) {
+			toke->lexeme = (char *)malloc(10*sizeof(char));
+			strcpy(toke->lexeme, "procedure");
+			toke->type = procsym;
+			return toke;
+		}
+	}
+	if (isLetter(contents[*counter+i])) error(3);
 }
 
 Token *nextToken(int *counter, char *contents) {
@@ -61,152 +222,17 @@ Token *nextToken(int *counter, char *contents) {
 	} else if (isDigit(contents[*counter])) {
 		toke->type = numbersym;
 	} else {
-		switch (contents[*counter]) {
-			toke->lexeme = (char *)malloc(2*sizeof(char));
-			case '+':
-				toke->type = plussym;
-				strcpy(toke->lexeme, "+\0");
-				return toke;
-			case '-':
-				toke->type = minussym;
-				strcpy(toke->lexeme, "-\0");
-				return toke;
-			case '*':
-				toke->type = multsym;
-				strcpy(toke->lexeme, "*\0");
-				return toke;
-			case '/':
-				toke->type = slashsym;
-				free(toke->lexeme);
-				return toke;
-			case '=':
-				toke->type = eqlsym;
-				strcpy(toke->lexeme, "=\0");
-				return toke;
-			case '<':
-				toke->type = lessym;
-				free(toke->lexeme);
-				return toke;
-			case '>':
-				toke->type = gtrsym;
-				free(toke->lexeme);
-				return toke;
-			case '(':
-				toke->type = lparentsym;
-				strcpy(toke->lexeme, "(\0");
-				return toke;
-			case ')':
-				toke->type = rparentsym;
-				strcpy(toke->lexeme, ")\0");
-				return toke;
-			case ',':
-				toke->type = commasym;
-				strcpy(toke->lexeme, ",\0");
-				return toke;
-			case ';':
-				toke->type = semicolonsym;
-				strcpy(toke->lexeme, ";\0");
-				return toke;
-			case '.':
-				toke->type = periodsym;
-				strcpy(toke->lexeme, ".\0");
-				return toke;
-			case ':':
-				toke->type = becomessym;
-				strcpy(toke->lexeme, ".\0");
-				return toke;
-			default:
-				error(4);
+		toke = analyzeOther(counter, contents, toke);
 	}
 
 	switch (toke->type) {
 		case numbersym:
-			for(i=1; i<5; i++) {
-				if (!isDigit(contents[*counter+i])) break;
-			}
-			if (isDigit(contents[*counter+i])) error(2);
-
-			toke->lexeme = (char *)malloc((i+1)*sizeof(char));
-			strncpy(toke->lexeme, contents+*counter, i);
-			toke->lexeme[i] = '\0';
-			*counter += i-1;
+			toke = analyzeNumber(counter, contents, toke);
+			break;
 
 		case identsym:
-			word[0] = contents[*counter];
-			for(i=1; i<11; i++) {
-				word[i] = contents[*counter+i];
-				word[i+1] = '\0';
-				if (!isLetter(word[i]) && !isDigit(word[i])) { 
-					break;
-				} else if (i == 1 && strcmp(word, "if") == 0) {
-					toke->lexeme = (char *)malloc(3*sizeof(char));
-					strcpy(toke->lexeme, "if");
-					toke->type = ifsym; 
-					return toke;
-				} else if (i == 1 && strcmp(word, "do") == 0) {
-					toke->lexeme = (char *)malloc(3*sizeof(char));
-					strcpy(toke->lexeme, "do");
-					toke->type = dosym;
-					return toke;
-				} else if (i == 2 && strcmp(word, "var") == 0) {
-					toke->lexeme = (char *)malloc(4*sizeof(char));
-					strcpy(toke->lexeme, "var");
-					toke->type = dosym;
-					return toke;
-				} else if (i == 2 && strcmp(word, "end") == 0) {
-					toke->lexeme = (char *)malloc(4*sizeof(char));
-					strcpy(toke->lexeme, "end");
-					toke->type = dosym;
-					return toke;
-				} else if (i == 3 && strcmp(word, "call") == 0) {
-					toke->lexeme = (char *)malloc(5*sizeof(char));
-					strcpy(toke->lexeme, "call");
-					toke->type = dosym;
-					return toke;
-				} else if (i == 3 && strcmp(word, "then") == 0) {
-					toke->lexeme = (char *)malloc(5*sizeof(char));
-					strcpy(toke->lexeme, "then");
-					toke->type = dosym;
-					return toke;
-				} else if (i == 3 && strcmp(word, "else") == 0) {
-					toke->lexeme = (char *)malloc(5*sizeof(char));
-					strcpy(toke->lexeme, "else");
-					toke->type = dosym;
-					return toke;
-				} else if (i == 3 && strcmp(word, "read") == 0) {
-					toke->lexeme = (char *)malloc(5*sizeof(char));
-					strcpy(toke->lexeme, "read");
-					toke->type = dosym;
-					return toke;
-				} else if (i == 4 && strcmp(word, "const") == 0) {
-					toke->lexeme = (char *)malloc(6*sizeof(char));
-					strcpy(toke->lexeme, "const");
-					toke->type = dosym;
-					return toke;
-				} else if (i == 4 && strcmp(word, "begin") == 0) {
-					toke->lexeme = (char *)malloc(6*sizeof(char));
-					strcpy(toke->lexeme, "begin");
-					toke->type = dosym;
-					return toke;
-				} else if (i == 4 && strcmp(word, "while") == 0) {
-					toke->lexeme = (char *)malloc(6*sizeof(char));
-					strcpy(toke->lexeme, "while");
-					toke->type = dosym;
-					return toke;
-				} else if (i == 4 && strcmp(word, "write") == 0) {
-					toke->lexeme = (char *)malloc(6*sizeof(char));
-					strcpy(toke->lexeme, "write");
-					toke->type = dosym;
-					return toke;
-				} else if (i == 8 && strcmp(word, "procedure") == 0) {
-					toke->lexeme = (char *)malloc(10*sizeof(char));
-					strcpy(toke->lexeme, "procedure");
-					toke->type = dosym;
-					return toke;
-				}
-			}
-
-
+			toke = analyzeIdentifier(counter, contents, toke);
+			break;
 
 		case slashsym:
 			if (contents[*counter+1] == '/') {
@@ -216,6 +242,7 @@ Token *nextToken(int *counter, char *contents) {
 				toke->lexeme = (char *)malloc(2*sizeof(char));
 				strcpy(toke->lexeme, "/\0");
 			}
+			break;
 
 		case lessym:
 			if (contents[++*counter] == '>') {
@@ -231,6 +258,7 @@ Token *nextToken(int *counter, char *contents) {
 				toke->lexeme = (char *)malloc(2*sizeof(char));
 				strcpy(toke->lexeme, "<\0");
 			}
+			break;
 
 		case gtrsym:
 			if (contents[++*counter] == '=') {
@@ -242,6 +270,7 @@ Token *nextToken(int *counter, char *contents) {
 				toke->lexeme = (char *)malloc(2*sizeof(char));
 				strcpy(toke->lexeme, ">\0");
 			}
+			break;
 	}
 }
 
