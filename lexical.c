@@ -140,6 +140,11 @@ Token *analyzeIdentifier(int *counter, char *contents, Token *toke) {
 		word[i+1] = '\0';
 		if (!isLetter(word[i]) && !isDigit(word[i])) { 
 			break;
+		else if(word[i] == ' '){
+			word[i] = '\0';
+			toke->lexeme = (char *)malloc(strlen(word)*sizeof(char));
+			strcpy(toke->lexeme, word);
+			return toke;
 		} else if (i == 1 && strcmp(word, "if") == 0) {
 			toke->lexeme = (char *)malloc(3*sizeof(char));
 			strcpy(toke->lexeme, "if");
