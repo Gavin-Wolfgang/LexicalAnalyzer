@@ -149,38 +149,60 @@ Token *nextToken(int *counter, char *contents) {
 					toke->type = dosym;
 					return toke;
 				} else if (i == 2 && strcmp(word, "var") == 0) {
-					toke->type = varsym;
-					break;
-				} else if (i == 2 && strcmp(word, "end") == 0) {
-					toke->type = endsym;
-					break;
-				} else if (i == 3 && strcmp(word, "call") == 0) {
-					toke->type = callsym;
-					break;
-				} else if (i == 3 && strcmp(word, "then") == 0) {
-					toke->type = thensym;
-					break;
-				} else if (i == 3 && strcmp(word, "else") == 0) {
-					toke->type = elsesym;
-					break;
-				} else if (i == 3 && strcmp(word, "read") == 0) {
-					toke->type = readsym;
-					break;
-				} else if (i == 4 && strcmp(word, "const") == 0) {
+					toke->lexeme = (char *)malloc(4*sizeof(char));
+					strcpy(toke->lexeme, "var");
 					toke->type = dosym;
-					break;
+					return toke;
+				} else if (i == 2 && strcmp(word, "end") == 0) {
+					toke->lexeme = (char *)malloc(4*sizeof(char));
+					strcpy(toke->lexeme, "end");
+					toke->type = dosym;
+					return toke;
+				} else if (i == 3 && strcmp(word, "call") == 0) {
+					toke->lexeme = (char *)malloc(5*sizeof(char));
+					strcpy(toke->lexeme, "call");
+					toke->type = dosym;
+					return toke;
+				} else if (i == 3 && strcmp(word, "then") == 0) {
+					toke->lexeme = (char *)malloc(5*sizeof(char));
+					strcpy(toke->lexeme, "then");
+					toke->type = dosym;
+					return toke;
+				} else if (i == 3 && strcmp(word, "else") == 0) {
+					toke->lexeme = (char *)malloc(5*sizeof(char));
+					strcpy(toke->lexeme, "else");
+					toke->type = dosym;
+					return toke;
+				} else if (i == 3 && strcmp(word, "read") == 0) {
+					toke->lexeme = (char *)malloc(5*sizeof(char));
+					strcpy(toke->lexeme, "read");
+					toke->type = dosym;
+					return toke;
+				} else if (i == 4 && strcmp(word, "const") == 0) {
+					toke->lexeme = (char *)malloc(6*sizeof(char));
+					strcpy(toke->lexeme, "const");
+					toke->type = dosym;
+					return toke;
 				} else if (i == 4 && strcmp(word, "begin") == 0) {
-					toke->type = beginsym;
-					break;
+					toke->lexeme = (char *)malloc(6*sizeof(char));
+					strcpy(toke->lexeme, "begin");
+					toke->type = dosym;
+					return toke;
 				} else if (i == 4 && strcmp(word, "while") == 0) {
-					toke->type = whilesym;
-					break;
+					toke->lexeme = (char *)malloc(6*sizeof(char));
+					strcpy(toke->lexeme, "while");
+					toke->type = dosym;
+					return toke;
 				} else if (i == 4 && strcmp(word, "write") == 0) {
-					toke->type = writesym;
-					break;
+					toke->lexeme = (char *)malloc(6*sizeof(char));
+					strcpy(toke->lexeme, "write");
+					toke->type = dosym;
+					return toke;
 				} else if (i == 8 && strcmp(word, "procedure") == 0) {
-					toke->type = procsym;
-					break;
+					toke->lexeme = (char *)malloc(10*sizeof(char));
+					strcpy(toke->lexeme, "procedure");
+					toke->type = dosym;
+					return toke;
 				}
 			}
 
