@@ -27,15 +27,16 @@ typedef struct TokenNode {
 // start linked list functions
 
 TokenNode *createNode(Token *toke) {
-	TokenNode *node = malloc(sizeof(TokenNode));
+	TokenNode *node = (TokenNode *)malloc(sizeof(TokenNode));
+	
+	printf("\tMem allocated");
+	fflush(stdin); fflush(stdout);
 	node->next = NULL;
-
-	if(toke == NULL){
+	if(toke == NULL)
 		node->toke = NULL;
-		return node;
-	}
+	else
+		node->toke = toke;
 
-	node->toke = toke;
 	return node;
 }
 
@@ -43,16 +44,17 @@ TokenNode *createNode(Token *toke) {
 TokenNode *addNode(TokenNode *head, Token *toke) {
 	TokenNode *temp = head;
 
-	if(head == NULL)
-		return createNode(toke);
+	if(head == NULL){
+		head = createNode(toke);
+		printf("\n"); return head;
+	}
 
 	while(temp->next != NULL)
 		temp = temp->next;
 
-	temp->next = malloc(sizeof(TokenNode));
-	temp->next->toke = toke;
-	temp->next->next = NULL;
-
+	printf("Creating next node");
+	temp->next = createNode(toke);
+	printf("\tNode created\n");
 	return head;
 }
 
@@ -61,8 +63,10 @@ void printList(TokenNode *head) {
 
 	printf("Lexeme List:\n");
 	while(temp != NULL) {
-		if(temp->toke->type == identsym)
-			printf("%d %s", temp->toke->type, temp->lexeme);
+		if(temp->toke == NULL)
+			printf("NullBois ");
+		else if(temp->toke->type == identsym)
+			printf("%d %s", temp->toke->type, temp->toke->lexeme);
 		else	
 			printf("%d ", temp->toke->type);
 
@@ -104,16 +108,16 @@ int readFile(char *filename, char *contents) {
 		if (c == '\t' || c == ' ') continue;
 		contents[i++] = c;
 	}
-
+	contents[i] = '\0';
 	fclose(file);
 	return i;
 }
 
-bool isLetter(char c) {
+int isLetter(char c) {
 	return ((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z'));
 }
 
-bool isDigit(char c) {
+int isDigit(char c) {
 	return ((c >= '0') && (c <= '9'));
 }
 
@@ -180,6 +184,8 @@ Token *analyzeOther(int *counter, char *contents, Token *toke) {
 		default:
 			error(4);
 	}
+
+	return toke;
 }
 
 Token *analyzeNumber(int *counter, char *contents, Token *toke) {
@@ -210,81 +216,101 @@ Token *analyzeIdentifier(int *counter, char *contents, Token *toke) {
 	for(i=1; i<11; i++) {
 		word[i] = contents[*counter+i];
 		word[i+1] = '\0';
-		if (!isLetter(word[i]) && !isDigit(word[i])) { 
-			break;
-		} else if(word[i] == ' '){
+		if(!isDigit(word[i]) && !isLetter(word[i])){
 			word[i] = '\0';
 			toke->lexeme = (char *)malloc(strlen(word)*sizeof(char));
 			strcpy(toke->lexeme, word);
+			*counter = *counter+i-1;
 			return toke;
 		} else if (i == 1 && strcmp(word, "if") == 0) {
 			toke->lexeme = (char *)malloc(3*sizeof(char));
 			strcpy(toke->lexeme, "if");
 			toke->type = ifsym; 
+			*counter = *counter+i;
 			return toke;
 		} else if (i == 1 && strcmp(word, "do") == 0) {
 			toke->lexeme = (char *)malloc(3*sizeof(char));
 			strcpy(toke->lexeme, "do");
 			toke->type = dosym;
+			*counter = *counter+i;
 			return toke;
 		} else if (i == 2 && strcmp(word, "var") == 0) {
 			toke->lexeme = (char *)malloc(4*sizeof(char));
 			strcpy(toke->lexeme, "var");
 			toke->type = varsym;
+			*counter = *counter+i;
 			return toke;
 		} else if (i == 2 && strcmp(word, "end") == 0) {
 			toke->lexeme = (char *)malloc(4*sizeof(char));
 			strcpy(toke->lexeme, "end");
+			*counter = *counter+i;
 			toke->type = endsym;
 			return toke;
 		} else if (i == 3 && strcmp(word, "call") == 0) {
 			toke->lexeme = (char *)malloc(5*sizeof(char));
 			strcpy(toke->lexeme, "call");
 			toke->type = callsym;
+			*counter = *counter+i;
 			return toke;
 		} else if (i == 3 && strcmp(word, "then") == 0) {
 			toke->lexeme = (char *)malloc(5*sizeof(char));
 			strcpy(toke->lexeme, "then");
 			toke->type = thensym;
+			*counter = *counter+i;
 			return toke;
 		} else if (i == 3 && strcmp(word, "else") == 0) {
 			toke->lexeme = (char *)malloc(5*sizeof(char));
 			strcpy(toke->lexeme, "else");
 			toke->type = elsesym;
+			*counter = *counter+i;
 			return toke;
 		} else if (i == 3 && strcmp(word, "read") == 0) {
 			toke->lexeme = (char *)malloc(5*sizeof(char));
 			strcpy(toke->lexeme, "read");
 			toke->type = readsym;
+			*counter = *counter+i;
 			return toke;
 		} else if (i == 4 && strcmp(word, "const") == 0) {
 			toke->lexeme = (char *)malloc(6*sizeof(char));
 			strcpy(toke->lexeme, "const");
 			toke->type = constsym;
+			*counter = *counter+i;
 			return toke;
 		} else if (i == 4 && strcmp(word, "begin") == 0) {
 			toke->lexeme = (char *)malloc(6*sizeof(char));
 			strcpy(toke->lexeme, "begin");
 			toke->type = beginsym;
+			*counter = *counter+i;
 			return toke;
 		} else if (i == 4 && strcmp(word, "while") == 0) {
 			toke->lexeme = (char *)malloc(6*sizeof(char));
 			strcpy(toke->lexeme, "while");
 			toke->type = whilesym;
+			*counter = *counter+i;
 			return toke;
 		} else if (i == 4 && strcmp(word, "write") == 0) {
 			toke->lexeme = (char *)malloc(6*sizeof(char));
 			strcpy(toke->lexeme, "write");
 			toke->type = writesym;
+			*counter = *counter+i;
 			return toke;
 		} else if (i == 8 && strcmp(word, "procedure") == 0) {
 			toke->lexeme = (char *)malloc(10*sizeof(char));
 			strcpy(toke->lexeme, "procedure");
 			toke->type = procsym;
+			*counter = *counter+i;
 			return toke;
 		}
 	}
-	if (isLetter(contents[*counter+i])) error(3);
+	if (isLetter(contents[*counter+i]) || isDigit(contents[*counter+i])) error(3);
+
+	if(!isDigit(word[i]) && !isLetter(word[i])){
+		word[i] = '\0';
+		toke->lexeme = (char *)malloc(strlen(word)*sizeof(char));
+		strcpy(toke->lexeme, word);
+		*counter = *counter+i;
+		return toke;
+	}
 }
 
 Token *nextToken(int *counter, char *contents) {
@@ -363,6 +389,8 @@ void analyze(int fileSize, char *contents, TokenNode *head) {
 	for(i=0; i<fileSize; i++) {
 		toke = nextToken(&i, contents);
 		head = addNode(head, toke);
+		printList(head);
+		printf("\n");
 
 		/*
 		if (isLetter(contents[i])) {
@@ -379,6 +407,9 @@ void analyze(int fileSize, char *contents, TokenNode *head) {
 int main(int argc, char** argsv) {
 	char contents[MAX_SIZE] = {};
 	int fileSize = readFile(argsv[1], contents);
+	printf("%s\n\n", contents);
 	TokenNode *head = NULL;
 	analyze(fileSize, contents, head);
+	printTable(head);
+	printList(head);
 }
