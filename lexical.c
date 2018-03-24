@@ -30,8 +30,10 @@ TokenNode *createNode(Token *toke) {
 	TokenNode *node = malloc(sizeof(TokenNode));
 	node->next = NULL;
 
-	if(toke == NULL)
+	if(toke == NULL){
+		node->toke = NULL;
 		return node;
+	}
 
 	node->toke = toke;
 	return node;
@@ -47,7 +49,7 @@ TokenNode *addNode(TokenNode *head, Token *toke) {
 	while(temp->next != NULL)
 		temp = temp->next;
 
-	temp->next = malloc(sizeof(Token));
+	temp->next = malloc(sizeof(TokenNode));
 	temp->next->toke = toke;
 	temp->next->next = NULL;
 
