@@ -56,6 +56,39 @@ TokenNode *addNode(TokenNode *head, Token *toke) {
 	return head;
 }
 
+void printList(TokenNode *head) {
+	TokenNode *temp = head;
+
+	printf("Lexeme List:\n");
+	while(temp != NULL) {
+		if(temp->toke->type == identsym)
+			printf("%d %s", temp->toke->type, temp->lexeme);
+		else	
+			printf("%d ", temp->toke->type);
+
+		temp = temp->next;
+	}
+}
+
+void printTable(TokenNode *head) {
+	TokenNode *temp = head;
+	int len;
+
+	printf("Lexeme Table:\n");
+	printf("Lexeme\t\ttoken type\n");
+	while(temp != NULL) {
+		len = strlen(temp->toke->lexeme);
+		if(len < 4)
+			printf("%s\t\t\t%d\n", temp->toke->lexeme, temp->toke->type);
+		else if(len < 8)
+			printf("%s\t\t%d\n", temp->toke->lexeme, temp->toke->type);
+		else
+			printf("%s\t%d\n", temp->toke->lexeme, temp->toke->type);
+
+		temp = temp->next;
+	}
+}
+
 // end linked list functions
 
 int readFile(char *filename, char *contents) {
