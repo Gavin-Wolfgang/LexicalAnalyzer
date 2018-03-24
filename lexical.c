@@ -182,7 +182,7 @@ Token *analyzeOther(int *counter, char *contents, Token *toke) {
 		case '#':
 			return NULL;	// dont know what to do here but passes test
 		default:
-			printf("ASCII: %i\n", contents[*counter]);
+			// printf("ASCII: %i\n", contents[*counter]); // This line was so useful
 			error(4);
 	}
 
