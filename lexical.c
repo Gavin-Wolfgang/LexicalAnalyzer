@@ -315,7 +315,7 @@ Token *analyzeIdentifier(int *counter, char *contents, Token *toke) {
 }
 
 int checkOther(char c) {
-	return (c == '\n') || (c == ' ') || (c == 13) || (c == -1);
+	return (c == '\n') || (c == ' ') || (c == 13) || (c == -1) || (c == '#');
 }
 
 
