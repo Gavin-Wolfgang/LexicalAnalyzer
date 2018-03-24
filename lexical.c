@@ -19,6 +19,43 @@ typedef struct Token {
 	char *lexeme;
 } Token;
 
+typedef struct TokenNode {
+	Token *toke;
+	struct TokenNode *next;
+} TokenNode;
+
+// start linked list functions
+
+TokenNode *createNode(Token *toke) {
+	TokenNode *node = malloc(sizeof(TokenNode));
+	node->next = NULL;
+
+	if(toke == NULL)
+		return node;
+
+	node->toke = toke;
+	return node;
+}
+
+// Adds node to tail, I dont think we need to add any to the head
+TokenNode *addNode(TokenNode *head, Token *toke) {
+	TokenNode *temp = head;
+
+	if(head == NULL)
+		return createNode(toke);
+
+	while(temp->next != NULL)
+		temp = temp->next;
+
+	temp->next = malloc(sizeof(Token));
+	temp->next->toke = toke;
+	temp->next->next = NULL;
+
+	return head;
+}
+
+// end linked list functions
+
 int readFile(char *filename, char *contents) {
 	FILE *file = fopen(filename, "r");
 
@@ -140,7 +177,7 @@ Token *analyzeIdentifier(int *counter, char *contents, Token *toke) {
 		word[i+1] = '\0';
 		if (!isLetter(word[i]) && !isDigit(word[i])) { 
 			break;
-		else if(word[i] == ' '){
+		} else if(word[i] == ' '){
 			word[i] = '\0';
 			toke->lexeme = (char *)malloc(strlen(word)*sizeof(char));
 			strcpy(toke->lexeme, word);
@@ -277,14 +314,22 @@ Token *nextToken(int *counter, char *contents) {
 			}
 			break;
 	}
+
+	return toke;
 }
 
-void analyze(int fileSize, char *contents) {
+void analyze(int fileSize, char *contents, TokenNode *head) {
 	int i, j = 0;
 	token_type *tokenTypes = (token_type *)malloc(fileSize*sizeof(token_type));
 	char **tokens = (char **)malloc(fileSize*sizeof(char*));
+	Token *toke = NULL;
+	
 
 	for(i=0; i<fileSize; i++) {
+		toke = nextToken(&i, contents);
+		head = addNode(head, toke);
+
+		/*
 		if (isLetter(contents[i])) {
 			//stuff
 		} else if (isDigit(contents[i])) {
@@ -292,10 +337,13 @@ void analyze(int fileSize, char *contents) {
 		} else {
 
 		}
+		*/
 	}
 }
 
 int main(int argc, char** argsv) {
 	char contents[MAX_SIZE] = {};
 	int fileSize = readFile(argsv[1], contents);
+	TokenNode *head = NULL;
+	analyze(fileSize, contents, head);
 }
