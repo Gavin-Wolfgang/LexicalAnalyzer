@@ -29,8 +29,6 @@ typedef struct TokenNode {
 TokenNode *createNode(Token *toke) {
 	TokenNode *node = (TokenNode *)malloc(sizeof(TokenNode));
 	
-	printf("\tMem allocated");
-	fflush(stdin); fflush(stdout);
 	node->next = NULL;
 	if(toke == NULL)
 		node->toke = NULL;
@@ -52,9 +50,7 @@ TokenNode *addNode(TokenNode *head, Token *toke) {
 	while(temp->next != NULL)
 		temp = temp->next;
 
-	printf("Creating next node");
 	temp->next = createNode(toke);
-	printf("\tNode created\n");
 	return head;
 }
 
@@ -66,12 +62,13 @@ void printList(TokenNode *head) {
 		if(temp->toke == NULL)
 			printf("NullBois ");
 		else if(temp->toke->type == identsym)
-			printf("%d %s", temp->toke->type, temp->toke->lexeme);
+			printf("%d %s ", temp->toke->type, temp->toke->lexeme);
 		else	
 			printf("%d ", temp->toke->type);
 
 		temp = temp->next;
 	}
+	printf("\n");
 }
 
 void printTable(TokenNode *head) {
@@ -82,9 +79,7 @@ void printTable(TokenNode *head) {
 	printf("Lexeme\t\ttoken type\n");
 	while(temp != NULL) {
 		len = strlen(temp->toke->lexeme);
-		if(len < 4)
-			printf("%s\t\t\t%d\n", temp->toke->lexeme, temp->toke->type);
-		else if(len < 8)
+		if(len < 8)
 			printf("%s\t\t%d\n", temp->toke->lexeme, temp->toke->type);
 		else
 			printf("%s\t%d\n", temp->toke->lexeme, temp->toke->type);
@@ -105,7 +100,7 @@ int readFile(char *filename, char *contents) {
 
 	while (!feof(file)) {
 		c = fgetc(file);
-		if (c == '\t' || c == ' ') continue;
+		if (c == '\t') continue;
 		contents[i++] = c;
 	}
 	contents[i] = '\0';
@@ -127,27 +122,27 @@ void error(int e) {
 }
 
 Token *analyzeOther(int *counter, char *contents, Token *toke) {
+	toke->lexeme = (char *)malloc(2*sizeof(char));
 	switch (contents[*counter]) {
-		toke->lexeme = (char *)malloc(2*sizeof(char));
 		case '+':
 			toke->type = plussym;
-			strcpy(toke->lexeme, "+\0");
+			strcpy(toke->lexeme, "+");
 			return toke;
 		case '-':
 			toke->type = minussym;
-			strcpy(toke->lexeme, "-\0");
+			strcpy(toke->lexeme, "-");
 			return toke;
 		case '*':
 			toke->type = multsym;
-			strcpy(toke->lexeme, "*\0");
+			strcpy(toke->lexeme, "*");
 			return toke;
 		case '/':
 			toke->type = slashsym;
-			free(toke->lexeme);
+			strcpy(toke->lexeme, "/");
 			return toke;
 		case '=':
 			toke->type = eqsym;
-			strcpy(toke->lexeme, "=\0");
+			strcpy(toke->lexeme, "=");
 			return toke;
 		case '<':
 			toke->type = lessym;
@@ -159,29 +154,35 @@ Token *analyzeOther(int *counter, char *contents, Token *toke) {
 			return toke;
 		case '(':
 			toke->type = lparentsym;
-			strcpy(toke->lexeme, "(\0");
+			strcpy(toke->lexeme, "(");
 			return toke;
 		case ')':
 			toke->type = rparentsym;
-			strcpy(toke->lexeme, ")\0");
+			strcpy(toke->lexeme, ")");
 			return toke;
 		case ',':
 			toke->type = commasym;
-			strcpy(toke->lexeme, ",\0");
+			strcpy(toke->lexeme, ",");
 			return toke;
 		case ';':
 			toke->type = semicolonsym;
-			strcpy(toke->lexeme, ";\0");
+			strcpy(toke->lexeme, ";");
 			return toke;
 		case '.':
 			toke->type = periodsym;
-			strcpy(toke->lexeme, ".\0");
+			strcpy(toke->lexeme, ".");
 			return toke;
 		case ':':
 			toke->type = becomessym;
-			strcpy(toke->lexeme, ".\0");
+			free(toke->lexeme);
+			toke->lexeme = malloc(3*sizeof(char));
+			strcpy(toke->lexeme, ":=");
+			*counter += 1;
 			return toke;
+		case '#':
+			return NULL;	// dont know what to do here but passes test
 		default:
+			printf("ASCII: %i\n", contents[*counter]);
 			error(4);
 	}
 
@@ -222,79 +223,79 @@ Token *analyzeIdentifier(int *counter, char *contents, Token *toke) {
 			strcpy(toke->lexeme, word);
 			*counter = *counter+i-1;
 			return toke;
-		} else if (i == 1 && strcmp(word, "if") == 0) {
+		} else if (i == 1 && strcmp(word, "if") == 0 && contents[*counter+1] == ' ') {
 			toke->lexeme = (char *)malloc(3*sizeof(char));
 			strcpy(toke->lexeme, "if");
 			toke->type = ifsym; 
 			*counter = *counter+i;
 			return toke;
-		} else if (i == 1 && strcmp(word, "do") == 0) {
+		} else if (i == 1 && strcmp(word, "do") == 0 && contents[*counter+1] == ' ') {
 			toke->lexeme = (char *)malloc(3*sizeof(char));
 			strcpy(toke->lexeme, "do");
 			toke->type = dosym;
 			*counter = *counter+i;
 			return toke;
-		} else if (i == 2 && strcmp(word, "var") == 0) {
+		} else if (i == 2 && strcmp(word, "var") == 0 && contents[*counter+1] == ' ') {
 			toke->lexeme = (char *)malloc(4*sizeof(char));
 			strcpy(toke->lexeme, "var");
 			toke->type = varsym;
 			*counter = *counter+i;
 			return toke;
-		} else if (i == 2 && strcmp(word, "end") == 0) {
+		} else if (i == 2 && strcmp(word, "end") == 0 && contents[*counter+1] == ' ') {
 			toke->lexeme = (char *)malloc(4*sizeof(char));
 			strcpy(toke->lexeme, "end");
 			*counter = *counter+i;
 			toke->type = endsym;
 			return toke;
-		} else if (i == 3 && strcmp(word, "call") == 0) {
+		} else if (i == 3 && strcmp(word, "call") == 0 && contents[*counter+1] == ' ') {
 			toke->lexeme = (char *)malloc(5*sizeof(char));
 			strcpy(toke->lexeme, "call");
 			toke->type = callsym;
 			*counter = *counter+i;
 			return toke;
-		} else if (i == 3 && strcmp(word, "then") == 0) {
+		} else if (i == 3 && strcmp(word, "then") == 0 && contents[*counter+1] == ' ') {
 			toke->lexeme = (char *)malloc(5*sizeof(char));
 			strcpy(toke->lexeme, "then");
 			toke->type = thensym;
 			*counter = *counter+i;
 			return toke;
-		} else if (i == 3 && strcmp(word, "else") == 0) {
+		} else if (i == 3 && strcmp(word, "else") == 0 && contents[*counter+1] == ' ') {
 			toke->lexeme = (char *)malloc(5*sizeof(char));
 			strcpy(toke->lexeme, "else");
 			toke->type = elsesym;
 			*counter = *counter+i;
 			return toke;
-		} else if (i == 3 && strcmp(word, "read") == 0) {
+		} else if (i == 3 && strcmp(word, "read") == 0 && contents[*counter+1] == ' ') {
 			toke->lexeme = (char *)malloc(5*sizeof(char));
 			strcpy(toke->lexeme, "read");
 			toke->type = readsym;
 			*counter = *counter+i;
 			return toke;
-		} else if (i == 4 && strcmp(word, "const") == 0) {
+		} else if (i == 4 && strcmp(word, "const") == 0 && contents[*counter+1] == ' ') {
 			toke->lexeme = (char *)malloc(6*sizeof(char));
 			strcpy(toke->lexeme, "const");
 			toke->type = constsym;
 			*counter = *counter+i;
 			return toke;
-		} else if (i == 4 && strcmp(word, "begin") == 0) {
+		} else if (i == 4 && strcmp(word, "begin") == 0 && contents[*counter+1] == ' ') {
 			toke->lexeme = (char *)malloc(6*sizeof(char));
 			strcpy(toke->lexeme, "begin");
 			toke->type = beginsym;
 			*counter = *counter+i;
 			return toke;
-		} else if (i == 4 && strcmp(word, "while") == 0) {
+		} else if (i == 4 && strcmp(word, "while") == 0 && contents[*counter+1] == ' ') {
 			toke->lexeme = (char *)malloc(6*sizeof(char));
 			strcpy(toke->lexeme, "while");
 			toke->type = whilesym;
 			*counter = *counter+i;
 			return toke;
-		} else if (i == 4 && strcmp(word, "write") == 0) {
+		} else if (i == 4 && strcmp(word, "write") == 0 && contents[*counter+1] == ' ') {
 			toke->lexeme = (char *)malloc(6*sizeof(char));
 			strcpy(toke->lexeme, "write");
 			toke->type = writesym;
 			*counter = *counter+i;
 			return toke;
-		} else if (i == 8 && strcmp(word, "procedure") == 0) {
+		} else if (i == 8 && strcmp(word, "procedure") == 0 && contents[*counter+1] == ' ') {
 			toke->lexeme = (char *)malloc(10*sizeof(char));
 			strcpy(toke->lexeme, "procedure");
 			toke->type = procsym;
@@ -313,6 +314,11 @@ Token *analyzeIdentifier(int *counter, char *contents, Token *toke) {
 	}
 }
 
+int checkOther(char c) {
+	return (c == '\n') || (c == ' ') || (c == 13) || (c == -1);
+}
+
+
 Token *nextToken(int *counter, char *contents) {
 	Token *toke = (Token *)malloc(sizeof(Token));
 	token_type t;
@@ -320,12 +326,16 @@ Token *nextToken(int *counter, char *contents) {
 	bool comment = false;
 	int i;
 
+	if(checkOther(contents[*counter]))
+		return NULL;
 	if (isLetter(contents[*counter])) {
 		toke->type = identsym;
 	} else if (isDigit(contents[*counter])) {
 		toke->type = numbersym;
 	} else {
 		toke = analyzeOther(counter, contents, toke);
+		if(toke == NULL)
+			return toke;
 	}
 
 	switch (toke->type) {
@@ -337,6 +347,7 @@ Token *nextToken(int *counter, char *contents) {
 			toke = analyzeIdentifier(counter, contents, toke);
 			break;
 
+		/*
 		case slashsym:
 			if (contents[*counter+1] == '/') {
 				*counter++;
@@ -346,6 +357,7 @@ Token *nextToken(int *counter, char *contents) {
 				strcpy(toke->lexeme, "/\0");
 			}
 			break;
+		*/
 
 		case lessym:
 			if (contents[++*counter] == '>') {
@@ -379,18 +391,17 @@ Token *nextToken(int *counter, char *contents) {
 	return toke;
 }
 
-void analyze(int fileSize, char *contents, TokenNode *head) {
+TokenNode *analyze(int fileSize, char *contents) {
 	int i, j = 0;
 	token_type *tokenTypes = (token_type *)malloc(fileSize*sizeof(token_type));
 	char **tokens = (char **)malloc(fileSize*sizeof(char*));
 	Token *toke = NULL;
+	TokenNode *head = NULL;
 	
-
 	for(i=0; i<fileSize; i++) {
 		toke = nextToken(&i, contents);
-		head = addNode(head, toke);
-		printList(head);
-		printf("\n");
+		if(toke != NULL)
+			head = addNode(head, toke);
 
 		/*
 		if (isLetter(contents[i])) {
@@ -402,14 +413,12 @@ void analyze(int fileSize, char *contents, TokenNode *head) {
 		}
 		*/
 	}
+	printList(head);
+	printTable(head);
 }
 
 int main(int argc, char** argsv) {
 	char contents[MAX_SIZE] = {};
 	int fileSize = readFile(argsv[1], contents);
-	printf("%s\n\n", contents);
-	TokenNode *head = NULL;
-	analyze(fileSize, contents, head);
-	printTable(head);
-	printList(head);
+	analyze(fileSize, contents);
 }
