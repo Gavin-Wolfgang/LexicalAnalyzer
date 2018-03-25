@@ -1,0 +1,18 @@
+Source Program:trkTestIn.txt
+//Tricky Test
+//This test attempts to test whether or not the Lexical Analyzer
+//treats tricky cases correctly.
+
+,.
+
+x:=y;
+
+varx
+/
+
+/
+T
+/
+/
+T
+Error 3

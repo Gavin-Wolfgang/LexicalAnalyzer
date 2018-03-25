@@ -29,3 +29,4 @@ echo " Begin lexical-7 testing (trkTestIn.txt)"
 ./lex trkTestIn.txt > lexical-stu7.log
 diff lexical-stu7.log lexBase7.log
 
+read
