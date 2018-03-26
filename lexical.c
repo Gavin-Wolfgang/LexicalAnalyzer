@@ -61,7 +61,7 @@ void printList(TokenNode *head) {
 	while(temp != NULL) {
 		if(temp->toke == NULL)
 			printf("NullBois ");
-		else if(temp->toke->type == identsym)
+		else if(temp->toke->type == identsym || temp->toke->type == numbersym)
 			printf("%d %s ", temp->toke->type, temp->toke->lexeme);
 		else	
 			printf("%d ", temp->toke->type);
@@ -76,7 +76,7 @@ void printTable(TokenNode *head) {
 	int len;
 
 	printf("\nLexeme Table:\n");
-	printf("Lexeme\t\ttoken type\n");
+	printf("lexeme\t\ttoken type\n");
 	while(temp != NULL) {
 		len = strlen(temp->toke->lexeme);
 		if(len < 8)
@@ -118,7 +118,21 @@ int isDigit(char c) {
 }
 
 void error(int e) {
-	printf("Error %d", e);
+	printf("Error: ");
+	switch(e) {
+		case 1:
+			printf("Variable that does not start with letter.");
+			break;
+		case 2:
+			printf("Number too long.");
+			break;
+		case 3:
+			printf("Name too long.");
+			break;
+		case 4:
+			printf("Invalid symbol.");
+			break;
+	}
 	exit(e);
 }
 
@@ -211,18 +225,20 @@ Token *analyzeNumber(int *counter, char *contents, Token *toke) {
 }
 
 Token *analyzeIdentifier(int *counter, char *contents, Token *toke) {
-	char word[MAX_IDENT+1];
+	char word[MAX_IDENT+2];
 	int i;
 
-	for(i=0; i<11; i++) {
+	for(i=0; i<12; i++) {
 		word[i] = contents[*counter+i];
 		word[i+1] = '\0';
 		if(!isDigit(word[i]) && !isLetter(word[i])){
 			word[i] = '\0';
-			toke->lexeme = (char *)malloc(strlen(word)*sizeof(char));
+			toke->lexeme = (char *)malloc((strlen(word)+1)*sizeof(char));
 			strcpy(toke->lexeme, word);
-			*counter = *counter+i-1;
+			*counter += i-1;
 			break;
+		} else if(i == 11) {
+			error(3);
 		}
 	}
 
@@ -230,88 +246,73 @@ Token *analyzeIdentifier(int *counter, char *contents, Token *toke) {
 		toke->lexeme = (char *)malloc(3*sizeof(char));
 		strcpy(toke->lexeme, "if");
 		toke->type = ifsym; 
-		*counter = *counter+i;
 		return toke;
 	} else if (strcmp(word, "do") == 0) {
 		toke->lexeme = (char *)malloc(3*sizeof(char));
 		strcpy(toke->lexeme, "do");
 		toke->type = dosym;
-		*counter = *counter+i;
 		return toke;
 	} else if (strcmp(word, "var") == 0) {
 		toke->lexeme = (char *)malloc(4*sizeof(char));
 		strcpy(toke->lexeme, "var");
 		toke->type = varsym;
-		*counter = *counter+i;
 		return toke;
 	} else if (strcmp(word, "end") == 0) {
 		toke->lexeme = (char *)malloc(4*sizeof(char));
 		strcpy(toke->lexeme, "end");
-		*counter = *counter+i;
 		toke->type = endsym;
 		return toke;
 	} else if (strcmp(word, "call") == 0) {
 		toke->lexeme = (char *)malloc(5*sizeof(char));
 		strcpy(toke->lexeme, "call");
 		toke->type = callsym;
-		*counter = *counter+i;
 		return toke;
 	} else if (strcmp(word, "then") == 0) {
 		toke->lexeme = (char *)malloc(5*sizeof(char));
 		strcpy(toke->lexeme, "then");
 		toke->type = thensym;
-		*counter = *counter+i;
 		return toke;
 	} else if (strcmp(word, "else") == 0) {
 		toke->lexeme = (char *)malloc(5*sizeof(char));
 		strcpy(toke->lexeme, "else");
 		toke->type = elsesym;
-		*counter = *counter+i;
 		return toke;
 	} else if (strcmp(word, "read") == 0) {
 		toke->lexeme = (char *)malloc(5*sizeof(char));
 		strcpy(toke->lexeme, "read");
 		toke->type = readsym;
-		*counter = *counter+i;
 		return toke;
 	} else if (strcmp(word, "const") == 0) {
 		toke->lexeme = (char *)malloc(6*sizeof(char));
 		strcpy(toke->lexeme, "const");
 		toke->type = constsym;
-		*counter = *counter+i;
 		return toke;
 	} else if (strcmp(word, "begin") == 0) {
 		toke->lexeme = (char *)malloc(6*sizeof(char));
 		strcpy(toke->lexeme, "begin");
 		toke->type = beginsym;
-		*counter = *counter+i;
 		return toke;
 	} else if (strcmp(word, "while") == 0) {
 		toke->lexeme = (char *)malloc(6*sizeof(char));
 		strcpy(toke->lexeme, "while");
 		toke->type = whilesym;
-		*counter = *counter+i;
 		return toke;
 	} else if (strcmp(word, "write") == 0) {
 		toke->lexeme = (char *)malloc(6*sizeof(char));
 		strcpy(toke->lexeme, "write");
 		toke->type = writesym;
-		*counter = *counter+i;
 		return toke;
 	} else if (strcmp(word, "procedure") == 0) {
 		toke->lexeme = (char *)malloc(10*sizeof(char));
 		strcpy(toke->lexeme, "procedure");
 		toke->type = procsym;
-		*counter = *counter+i;
 		return toke;
 	}
-	if (isLetter(contents[*counter+i]) || isDigit(contents[*counter+i])) error(3);
 
 	if(!isDigit(word[i]) && !isLetter(word[i])){
 		word[i] = '\0';
 		toke->lexeme = (char *)malloc(strlen(word)*sizeof(char));
 		strcpy(toke->lexeme, word);
-		*counter = *counter+i;
 		return toke;
 	}
 
@@ -329,8 +330,6 @@ Token *nextToken(int *counter, char *contents) {
 	char word[MAX_IDENT+1];
 	bool comment = false;
 	int i;
-
-	printf("%c\n", contents[*counter]);
 
 	if(checkOther(contents[*counter]))
 		return NULL;
@@ -353,17 +352,20 @@ Token *nextToken(int *counter, char *contents) {
 			toke = analyzeIdentifier(counter, contents, toke);
 			break;
 
-		/*
+		
 		case slashsym:
-			if (contents[*counter+1] == '/') {
-				*counter++;
-				comment = true;
+			if (contents[*counter+1] == '*') {
+				while (true) {
+					while (contents[(*counter)++] != '*');
+					if (contents[(*counter)++] == '/') break;
+				}
+				return NULL;
 			} else {
 				toke->lexeme = (char *)malloc(2*sizeof(char));
 				strcpy(toke->lexeme, "/\0");
 			}
 			break;
-		*/
+		
 
 		case lessym:
 			if (contents[++*counter] == '>') {
@@ -398,6 +400,7 @@ Token *nextToken(int *counter, char *contents) {
 }
 
 TokenNode *analyze(int fileSize, char *contents) {
+	int c = 0;
 	int i, j = 0;
 	token_type *tokenTypes = (token_type *)malloc(fileSize*sizeof(token_type));
 	char **tokens = (char **)malloc(fileSize*sizeof(char*));

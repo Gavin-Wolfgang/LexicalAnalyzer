@@ -3,10 +3,5 @@ Source Program:err3In.txt
 //Name too long (Greater than 11 characters)
 
 eeeeeeeeeeee
-/
 
-/
-E
-/
-N
-Error 3
+Error: Name too long.

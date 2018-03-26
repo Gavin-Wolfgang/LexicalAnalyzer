@@ -35,8 +35,5 @@ procedure   //Proc Sym      30
 write       //Write Sym     31
 read        //Read Sym      32
 else        //Else Sym      33
-/
 
-/
-S
-Error 3
+Error: Invalid symbol.

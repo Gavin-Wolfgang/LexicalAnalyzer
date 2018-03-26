@@ -3,35 +3,18 @@ var x, y;
 begin
 	y := 3;
 	x := y + 56;
-end.v
-
- 
-y
-
-
-b
- 
-3
-;
-
-
-x
-:
- 
-y
-+
- 
-5
-;
-
-
-e
+end.
 
 Lexeme Table:
-Lexeme		token type
+lexeme		token type
 var		29
+x		2
+,		17
 y		2
+;		18
 begin		21
+y		2
+:=		20
 3		3
 ;		18
 x		2
@@ -41,6 +24,7 @@ y		2
 56		3
 ;		18
 end		22
+.		19
 
 Lexeme List:
-29 2 y 21 3 18 2 x 20 2 y 4 3 18 22 
+29 2 x 17 2 y 18 21 2 y 20 3 3 18 2 x 20 2 y 4 3 56 18 22 19 

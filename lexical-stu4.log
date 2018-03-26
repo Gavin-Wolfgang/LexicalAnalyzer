@@ -3,10 +3,5 @@ Source Program:err2In.txt
 //Number too long (5 digits)
 
 123456
-/
 
-/
-E
-/
-N
-Error 3
+Error: Number too long.

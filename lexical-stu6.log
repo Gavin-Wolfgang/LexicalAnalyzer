@@ -3,10 +3,5 @@ Source Program:err4In.txt
 //Invalid Symbols
 
 $ # & ! _ ~ ` ? 
-/
 
-/
-E
-/
-I
-Error 3
+Error: Invalid symbol.
